@@ -10,15 +10,19 @@ library(INLA)
 library(viridis)
 
 #Read data: d for whole dataset and excess for extremely low dataset (by u=35, trate>=35)
-d <- read.csv("data_scale.csv")
-
-#boxplot(Birth.Rate ~ Year, data = d, range = 0, xlab = "Year", ylab = "Birth rate", col = "darkseagreen", border = "navy", main = "")
+#d <- read.csv("model_data.csv")
+#str(d)
+#d1 <- d[,c(4,5,7,10,11,15,18:20,22:24,27:32)]
 
 #d2009 <- d[which(d$Year==2009),]
 #d2019 <- d[which(d$Year==2019),]
 #summary(d2009)
 
-#summary_data <- d2019 %>%
+#d20091 <- d2009[,c(14,15,18:20,22:24,27:31)]
+
+#d20191 <- d2019[,c(14,15,18:20,22:24,27:31)]
+
+#summary_data <- d20091 %>%
 #  summarise_all(list(mean = ~ mean(., na.rm = TRUE), sd = ~ sd(., na.rm = TRUE)))
 
 # Print the summary dataframe
@@ -26,28 +30,20 @@ d <- read.csv("data_scale.csv")
 
 
 
-#a <- as.data.frame(unique(excess$index))
-#a$location <- sub(", [0-9]+$", "", a$`unique(excess$index)`)
-#b <- freq(a$location)
-#b1 <- b[b$count>10,]
-#write.csv(b1,"index_10year.csv")
 
 
-u <- 35
-#u <- 38
+#u <- 35
 
 
-
-
-excess <- d[which(d$trate>=u),]
+#excess <- d[which(d$trate>=u),]
 #countyyear <- read.csv("index_10year.csv")
 #excess <- excess[excess$County %in% countyyear$item,]
 #excess <- read.csv("excess_scale.csv")
 #u=13
-excess$rate <- excess$trate-u
+#excess$rate <- excess$trate-u
 
-excess$Crisis <- ifelse(excess$Year<=2008,0,1)
-excess$Crisis <- as.factor(excess$Crisis)
+#excess$Crisis <- ifelse(excess$Year<=2008,0,1)
+#excess$Crisis <- as.factor(excess$Crisis)
 
 
 
@@ -55,6 +51,8 @@ excess$Crisis <- as.factor(excess$Crisis)
 
 #excess$Mother.s.Hispanic.Origin <- as.factor(excess$Mother.s.Hispanic.Origin)
 
+excess <- read.csv("excess_scale.csv")
+#excess$race <- as.factor(excess$race)
 #get US map
 m <- getData(name = "GADM", country = "USA", level = 0)
 
@@ -114,22 +112,22 @@ stk.e <- inla.stack(
   A = list(1, A),
   effects = list(data.frame(Intercept = rep(1, length(train_index)),
                             Year=excess$Year[train_index],
-                            race=excess$Mother.s.Hispanic.Origin[train_index],
-                            id=excess$X[train_index],
+                            race=excess$race[train_index],
+                            id=excess$ID[train_index],
                             Long=excess$long_s[train_index],
                             Lat=excess$lat_s[train_index],
-                            birth_weight=excess$Average.Birth.Weight[train_index],
-                            Precipitation=excess$Precipitation[train_index],
-                            Temperature=excess$Temperature[train_index],
-                            GDP=excess$GDP_per[train_index],
+                            birth_weight=excess$Average.Birth.Weight_s[train_index],
+                            Precipitation=excess$Precipitation_s[train_index],
+                            Temperature=excess$Temperature_s[train_index],
+                            GDP=excess$GDP_per_s[train_index],
                             PI=excess$PI[train_index],
                             RUCC=excess$RUCC[train_index],
-                            Marriage=excess$Crude.Marriage.Rate[train_index],
-                            Elder=excess$Elder_pop[train_index],
-                            Edu=excess$bachelor_percentage[train_index],
-                            Female_proportion=excess$female.proportion[train_index],
-                            Age_of_Mother=excess$Average.Age.of.Mother[train_index],
-                            LMP_Gestational_Age=excess$Average.LMP.Gestational.Age[train_index]), s = indexs)
+                            Marriage=excess$marriage_rate_s[train_index],
+                            Elder=excess$eld_proportion_s[train_index],
+                            Edu=excess$edu_s[train_index],
+                            Female_proportion=excess$Female.propotion_s[train_index],
+                            Age_of_Mother=excess$Average.Age.of.Mother_s[train_index],
+                            LMP_Gestational_Age=excess$Average.LMP.Gestational.Age_s[train_index]), s = indexs)
 )
 
 
@@ -139,22 +137,22 @@ stk.p <- inla.stack(
   A = list(1, Ap),
   effects = list(data.frame(Intercept = rep(1, length(test_index)),
                             Year=excess$Year[test_index],
-                            race=excess$Mother.s.Hispanic.Origin[test_index],
-                            id=excess$X[test_index],
+                            race=excess$race[test_index],
+                            id=excess$ID[test_index],
                             Long=excess$long_s[test_index],
                             Lat=excess$lat_s[test_index],
-                            birth_weight=excess$Average.Birth.Weight[test_index],
-                            Precipitation=excess$Precipitation[test_index],
-                            Temperature=excess$Temperature[test_index],
-                            GDP=excess$GDP_per[test_index],
-                            PI=excess$PI[test_index],
+                            birth_weight=excess$Average.Birth.Weight_s[test_index],
+                            Precipitation=excess$Precipitation_s[test_index],
+                            Temperature=excess$Temperature_s[test_index],
+                            GDP=excess$GDP_per_s[test_index],
+                            PI=excess$PI_s[test_index],
                             RUCC=excess$RUCC[test_index],
-                            Marriage=excess$Crude.Marriage.Rate[test_index],
-                            Elder=excess$Elder_pop[test_index],
-                            Edu=excess$bachelor_percentage[test_index],
-                            Female_proportion=excess$female.proportion[test_index],
-                            Age_of_Mother=excess$Average.Age.of.Mother[test_index],
-                            LMP_Gestational_Age=excess$Average.LMP.Gestational.Age[test_index]), s = indexs)
+                            Marriage=excess$marriage_rate_s[test_index],
+                            Elder=excess$eld_proportion_s[test_index],
+                            Edu=excess$edu_s[test_index],
+                            Female_proportion=excess$Female.propotion_s[test_index],
+                            Age_of_Mother=excess$Average.Age.of.Mother_s[test_index],
+                            LMP_Gestational_Age=excess$Average.LMP.Gestational.Age_s[test_index]), s = indexs)
 )
 
 stk.full <- inla.stack(stk.e, stk.p)
@@ -184,7 +182,7 @@ fromula5 <- y ~ -1+Intercept + race + Lat +Long + birth_weight  + RUCC + Elder +
   LMP_Gestational_Age + f(Year, model="ar1") + f(s, model = spde)+ f(id, model = "iid") 
 
 
-result <- inla(fromula4, 
+result <- inla(fromula5, 
                data = inla.stack.data(stk.full),
                family= "gp", 
                control.family = list(list(control.link  = list(model = "quantile", quantile = 0.65)#, hyper = list(theta  = hyper.pre)
@@ -261,6 +259,12 @@ p1 <- ggplot(data = plotting_data1, aes(x = Observed, y = Predicted)) +
   ylim(0, 10) + theme_bw() + ggtitle("")
 p1
 
+jpeg("ModelV.jpeg", quality = 100, units = "in", width = 10, height = 8, res = 600)
+
+# Print the plot or visualization
+p1
+# Close the jpeg device
+dev.off()
 
 ## Correlation
 obs_val <- plotting_data1[which(plotting_data1$group=="validation"),1]
@@ -273,8 +277,8 @@ cor(obs_val,pre_val)
 ## The following is about the plot for spatial effect
 
 bb <- st_bbox(m)
-x <- seq(bb$xmin - 1, bb$xmax + 1, length.out = 200)
-y <- seq(bb$ymin - 1, bb$ymax + 1, length.out = 200)
+x <- seq(bb$xmin - 1, bb$xmax + 1, length.out = 500)
+y <- seq(bb$ymin - 1, bb$ymax + 1, length.out = 500)
 dp <- as.matrix(expand.grid(x, y))
 plot(dp, asp = 1)
 p <- st_as_sf(data.frame(x = dp[, 1], y = dp[, 2]),
@@ -288,10 +292,10 @@ plot(dp, asp = 1)
 
 dp <- as.data.frame(dp)
 
-write.csv(dp,"dp.csv")
+write.csv(dp,"dp1.csv")
 
 
-spatial <- read.csv("dp.csv")
+spatial <- read.csv("dp1.csv")
 coord <- spatial[,2:3]
 coord <- as.matrix(coord)
 coord <- SpatialPoints(coord, proj4string = CRS(as.character(NA)),
@@ -309,16 +313,18 @@ b <- as.data.frame(g.sd)
 spatial$gmean <- a$g.mean
 spatial$gsd <- b$g.sd
 
+colnames(spatial) <- c("ID","long","lat","gmean","gsd")
+
 p1 <- ggplot(m) + geom_sf() + coord_sf(datum = NA) +
   geom_point(
     data = spatial, aes(x = long, y = lat, color = gmean),
-    size = 2
+    size = 1.2
   )  +
   labs(x = "", y = "",colour = "") +
   scale_color_viridis(option="inferno",begin = 0.2) +  theme_bw()+ggtitle("")
 
 
-
+p1
 
 
 p2 <- ggplot(m) + geom_sf() + coord_sf(datum = NA) +
@@ -329,15 +335,14 @@ p2 <- ggplot(m) + geom_sf() + coord_sf(datum = NA) +
   labs(x = "", y = "",colour = "") +scale_color_viridis(option="inferno",begin = 0.2)+theme_bw()+ggtitle("")
 
 
+p2
 
-
-
-#jpeg("ModelV.jpeg", quality = 100, units = "in", width = 6, height = 6, res = 300)
+jpeg("spatialmean.jpeg", quality = 100, units = "in", width = 10, height = 8, res = 600)
 
 # Print the plot or visualization
-#p1
+p1
 # Close the jpeg device
-#dev.off()
+dev.off()
 
 
 
@@ -438,76 +443,6 @@ stwcrps_val
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-## Appedix POT select
-library(POT)
-
-
-
-rate <- na.omit(d$trate)
-
-mrplot_1 <- mrlplot(rate)
-data <- data.frame(mrplot_1)
-max(mrplot_1$x)
-
-mrlplot(rate,u.range = c(30,42.56))
-
-par(mfrow = c(1,1))
-
-tc <- POT::tcplot(rate, nt = 150)
-
-plot(tc[[1]])
-plot(tc[[2]])
-
-
-tc <- POT::tcplot(d$trate,nt=50,)
-# Assuming you already have the tcplot stored in the variable 'tc'
-
-plot(tc[[1]])
-
-# Plot the second panel
-plot(tc[[2]])
-# Add vertical lines at x = 3.67
-abline(v = 3.67, col = "red", lty = 2)  # Add a red dashed vertical line
-
-# Create the mrlplot
-mrplot_1 <- mrlplot(National$T90)
-
-# Add the custom line with slope -0.3 and intercept 5.5
-mrlplot(rate,u.range = c(30,42.56))
-abline(a = 18.65, b = -0.47, col = "blue", lty = 2)
-abline(v = 35, col = "red", lty = 2)  # Add a red dashed vertical line
-
-
-jpeg("mrl1.jpeg", quality = 100, units = "in", width = 8, height = 6, res = 300)
-
-mrlplot(rate,u.range = c(25,42.56))
-abline(a = 18.65, b = -0.47, col = "blue", lty = 2)
-abline(v = 35, col = "red", lty = 2)  # Add a red dashed vertical line
-
-dev.off()
-
-
-
-jpeg("mrl_scale.jpeg", quality = 100, units = "in", width = 6, height = 6, res = 300)
-
-# Print the plot or visualization
-POT::tcplot(rate, nt=100,lty = 1, u.range = c(30,43),which = 1)
-
-# Add the custom line with slope -0.3 and intercept 5.5
-abline(v = 35, col = "red", lty = 2)  # Add a red dashed vertical line
-# Close the jpeg device
-dev.off()
 
 
 
