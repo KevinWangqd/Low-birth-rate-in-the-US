@@ -84,8 +84,8 @@ test_index <- which(excess$Year==2020)
 ## SPDE (PC prior)
 spde <- inla.spde2.pcmatern(mesh=mesh,
                             alpha = 2,
-                            prior.range = c(10,0.01), #P(range<10=0.01
-                            prior.sigma = c(1,0.01) # P(sigma>1)=0.01
+                            prior.range = c(100,0.8), #P(range<100)=0.8
+                            prior.sigma = c(3,0.1) # P(sigma>3)=0.1
 )
 
 
